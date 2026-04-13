@@ -221,8 +221,7 @@ class _NavItem extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                color: active ? Colors.white : SS.textLight, size: 22),
+            Icon(icon, color: active ? Colors.white : SS.textLight, size: 22),
             if (active) ...[
               const SizedBox(width: 6),
               Text(label,
@@ -236,6 +235,16 @@ class _NavItem extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── MOOD DATA ────────────────────────────────────────────────────────────────
+
+class MoodData {
+  final String name;
+  final String emoji;
+  final Color color;
+  final List<Color> gradient;
+  const MoodData(this.name, this.emoji, this.color, this.gradient);
 }
 
 // ─── HOME TAB ─────────────────────────────────────────────────────────────────
@@ -317,6 +326,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
           child: FadeTransition(opacity: anim, child: child),
         );
       },
+      // FIX: Pass _sendMood directly — signature now matches
       pageBuilder: (ctx, _, __) => _MoodDialog(mood: mood, onSend: _sendMood),
     );
   }
@@ -326,8 +336,9 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
     return SafeArea(
       bottom: false,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 120),
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 80), //changed according to gemini -1
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
@@ -344,8 +355,9 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
             Text('Tap to sync • Hold for a message',
                 style: TextStyle(fontSize: 13, color: SS.textLight)),
             const SizedBox(height: 24),
+            // FIX: 2x2 grid then full-width Needy button below
             _buildMoodGrid(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             _buildNeedyButton(),
           ],
         ),
@@ -424,7 +436,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Connected to Ansh',
+                    const Text('Connected to Daksh',
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -455,6 +467,8 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
     );
   }
 
+  // FIX: Use a Row-based 2×2 layout instead of GridView so heights are equal
+  // and there is consistent 14px spacing between all cards.
   Widget _buildMoodGrid() {
     final moods = [
       MoodData('Happy', '😊', const Color(0xFFFF6B9D),
@@ -466,23 +480,55 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
       MoodData('Angry', '😤', const Color(0xFFFF8C6B),
           [const Color(0xFFFF8C6B), const Color(0xFFFFAA8C)]),
     ];
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 14,
-      mainAxisSpacing: 14,
-      childAspectRatio: 1.0,
-      children: moods
-          .asMap()
-          .entries
-          .map((e) => _AnimatedMoodCard(
-                mood: e.value,
-                delay: Duration(milliseconds: e.key * 80),
-                onTap: () => _sendMood(e.value.name),
-                onLongPress: () => _openMoodDialog(e.value),
-              ))
-          .toList(),
+
+    return Column(
+      children: [
+        // Row 1
+        Row(
+          children: [
+            Expanded(
+              child: _AnimatedMoodCard(
+                mood: moods[0],
+                delay: const Duration(milliseconds: 0),
+                onTap: () => _sendMood(moods[0].name),
+                onLongPress: () => _openMoodDialog(moods[0]),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _AnimatedMoodCard(
+                mood: moods[1],
+                delay: const Duration(milliseconds: 80),
+                onTap: () => _sendMood(moods[1].name),
+                onLongPress: () => _openMoodDialog(moods[1]),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        // Row 2
+        Row(
+          children: [
+            Expanded(
+              child: _AnimatedMoodCard(
+                mood: moods[2],
+                delay: const Duration(milliseconds: 160),
+                onTap: () => _sendMood(moods[2].name),
+                onLongPress: () => _openMoodDialog(moods[2]),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: _AnimatedMoodCard(
+                mood: moods[3],
+                delay: const Duration(milliseconds: 240),
+                onTap: () => _sendMood(moods[3].name),
+                onLongPress: () => _openMoodDialog(moods[3]),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -497,16 +543,6 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
       isFeatured: true,
     );
   }
-}
-
-// ─── MOOD DATA ────────────────────────────────────────────────────────────────
-
-class MoodData {
-  final String name;
-  final String emoji;
-  final Color color;
-  final List<Color> gradient;
-  const MoodData(this.name, this.emoji, this.color, this.gradient);
 }
 
 // ─── ANIMATED MOOD CARD ───────────────────────────────────────────────────────
@@ -550,8 +586,7 @@ class _AnimatedMoodCardState extends State<_AnimatedMoodCard>
       ..repeat(reverse: true);
 
     _entry = CurvedAnimation(parent: _entryCtrl, curve: Curves.easeOutBack);
-    _press =
-        Tween<double>(begin: 1.0, end: 0.93).animate(_pressCtrl);
+    _press = Tween<double>(begin: 1.0, end: 0.93).animate(_pressCtrl);
 
     Future.delayed(widget.delay, () {
       if (mounted) _entryCtrl.forward();
@@ -581,7 +616,7 @@ class _AnimatedMoodCardState extends State<_AnimatedMoodCard>
           onTapDown: (_) => _pressCtrl.forward(),
           onTapCancel: () => _pressCtrl.reverse(),
           child: Container(
-            height: widget.isFeatured ? 110 : null,
+            height: 130,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: widget.mood.gradient,
@@ -601,7 +636,7 @@ class _AnimatedMoodCardState extends State<_AnimatedMoodCard>
             ),
             child: Stack(
               children: [
-                // Decorative circle
+                // Decorative circles
                 Positioned(
                   right: -20,
                   top: -20,
@@ -647,8 +682,7 @@ class _AnimatedMoodCardState extends State<_AnimatedMoodCard>
                                         fontWeight: FontWeight.w800)),
                                 Text('needs attention ♡',
                                     style: TextStyle(
-                                        color:
-                                            Colors.white.withOpacity(0.8),
+                                        color: Colors.white.withOpacity(0.8),
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600)),
                               ],
@@ -680,9 +714,11 @@ class _AnimatedMoodCardState extends State<_AnimatedMoodCard>
 
 // ─── MOOD DIALOG ──────────────────────────────────────────────────────────────
 
+// FIX: onSend signature changed to match _HomeTabState._sendMood exactly
 class _MoodDialog extends StatefulWidget {
   final MoodData mood;
-  final Function(String, {String message}) onSend;
+  final Future<void> Function(String mood, {String message}) onSend;
+
   const _MoodDialog({required this.mood, required this.onSend});
 
   @override
@@ -791,8 +827,7 @@ class _MoodDialogState extends State<_MoodDialog>
                   const SizedBox(height: 16),
                   GestureDetector(
                     onTap: () {
-                      widget.onSend(widget.mood.name,
-                          message: _ctrl.text);
+                      widget.onSend(widget.mood.name, message: _ctrl.text);
                       Navigator.pop(context);
                     },
                     child: AnimatedBuilder(
@@ -877,7 +912,9 @@ class HistoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FIX: Use .ref() directly — same pattern as original working code
     final ref = FirebaseDatabase.instance.ref().child('moods');
+
     return SafeArea(
       bottom: false,
       child: Column(children: [
@@ -925,25 +962,40 @@ class HistoryTab extends StatelessWidget {
                     child: CircularProgressIndicator(
                         color: SS.rose, strokeWidth: 2));
               }
+
+              // FIX: Robust null + type check matching original 400-line code
               if (!snap.hasData || snap.data!.snapshot.value == null) {
                 return _buildEmpty();
               }
-              final map = snap.data!.snapshot.value as Map<dynamic, dynamic>;
-              final list = map.values.toList()
-                ..sort((a, b) =>
-                    (b['timestamp'] as int).compareTo(a['timestamp'] as int));
+
+              final raw = snap.data!.snapshot.value;
+              if (raw is! Map) return _buildEmpty();
+
+              final map = raw as Map<dynamic, dynamic>;
+
+              // FIX: Build list from values, guard against non-map entries
+              final list = map.values
+                  .whereType<Map>()
+                  .toList()
+                ..sort((a, b) {
+                  final ta = (a['timestamp'] ?? 0) as int;
+                  final tb = (b['timestamp'] ?? 0) as int;
+                  return tb.compareTo(ta);
+                });
+
+              if (list.isEmpty) return _buildEmpty();
 
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
                 itemCount: list.length,
                 itemBuilder: (_, i) {
                   final item = list[i];
-                  final moodData = _getMoodData(item['mood'] ?? '');
-                  final dt = DateTime.fromMillisecondsSinceEpoch(
-                      item['timestamp'] as int);
+                  final moodData = _getMoodData((item['mood'] ?? '') as String);
+                  final ts = (item['timestamp'] ?? 0) as int;
+                  final dt = DateTime.fromMillisecondsSinceEpoch(ts);
                   return _HistoryCard(
                     mood: moodData,
-                    message: item['message'] ?? '',
+                    message: (item['message'] ?? '') as String,
                     time: DateFormat('h:mm a').format(dt),
                     date: _formatDate(dt),
                     delay: Duration(milliseconds: i * 60),
@@ -959,16 +1011,22 @@ class HistoryTab extends StatelessWidget {
 
   String _formatDate(DateTime dt) {
     final now = DateTime.now();
-    if (dt.day == now.day) return 'Today';
+    if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
+      return 'Today';
+    }
     final yesterday = now.subtract(const Duration(days: 1));
-    if (dt.day == yesterday.day) return 'Yesterday';
+    if (dt.year == yesterday.year &&
+        dt.month == yesterday.month &&
+        dt.day == yesterday.day) {
+      return 'Yesterday';
+    }
     return DateFormat('MMM d').format(dt);
   }
 
   Widget _buildEmpty() {
     return Center(
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text('💝', style: TextStyle(fontSize: 64)),
+        const Text('💝', style: TextStyle(fontSize: 64)),
         const SizedBox(height: 16),
         Text('No moods yet',
             style: TextStyle(
@@ -1071,8 +1129,8 @@ class _HistoryCardState extends State<_HistoryCard>
                           width: 46,
                           height: 46,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                                colors: widget.mood.gradient),
+                            gradient:
+                                LinearGradient(colors: widget.mood.gradient),
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Center(
@@ -1237,16 +1295,15 @@ class _NFCTabState extends State<NFCTab> with TickerProviderStateMixin {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Ripple animation
                     SizedBox(
                       width: 220,
                       height: 220,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          _buildRing(_ring3, 220, 0.0),
-                          _buildRing(_ring2, 170, 0.0),
-                          _buildRing(_ring1, 120, 0.0),
+                          _buildRing(_ring3, 220),
+                          _buildRing(_ring2, 170),
+                          _buildRing(_ring1, 120),
                           AnimatedBuilder(
                             animation: _iconCtrl,
                             builder: (_, __) => Transform.scale(
@@ -1283,9 +1340,7 @@ class _NFCTabState extends State<NFCTab> with TickerProviderStateMixin {
                       'Bring your devices together\nto sync instantly 💕',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 15,
-                          color: SS.textMid,
-                          height: 1.6),
+                          fontSize: 15, color: SS.textMid, height: 1.6),
                     ),
                     const SizedBox(height: 36),
                     _buildNFCButton(),
@@ -1299,7 +1354,7 @@ class _NFCTabState extends State<NFCTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildRing(AnimationController ctrl, double size, double startFrom) {
+  Widget _buildRing(AnimationController ctrl, double size) {
     return AnimatedBuilder(
       animation: ctrl,
       builder: (_, __) {
@@ -1311,10 +1366,7 @@ class _NFCTabState extends State<NFCTab> with TickerProviderStateMixin {
             height: size * (0.5 + 0.5 * progress),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: SS.rose,
-                width: 1.5,
-              ),
+              border: Border.all(color: SS.rose, width: 1.5),
             ),
           ),
         );
@@ -1324,11 +1376,10 @@ class _NFCTabState extends State<NFCTab> with TickerProviderStateMixin {
 
   Widget _buildNFCButton() {
     return GestureDetector(
-      onTap: () {
-        HapticFeedback.mediumImpact();
-      },
+      onTap: () => HapticFeedback.mediumImpact(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
         decoration: BoxDecoration(
           gradient: SS.heroGrad,
           borderRadius: BorderRadius.circular(20),
