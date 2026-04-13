@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "487600650426",
+    "firebase_url": "https://soulsync-e6539-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "soulsync-e6539",
+    "storage_bucket": "soulsync-e6539.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487600650426:android:2fc39351007df9185a6a83",
+        "android_client_info": {
+          "package_name": "com.example.soul2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSXqeaZC6GW27hmctz_HBXDxU1uHUipV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487600650426:android:4f440d8a037e9f1d5a6a83",
+        "android_client_info": {
+          "package_name": "com.example.soul_sync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSXqeaZC6GW27hmctz_HBXDxU1uHUipV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487600650426:android:09f75e6d24c325f85a6a83",
+        "android_client_info": {
+          "package_name": "com.soulsync.moodapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSXqeaZC6GW27hmctz_HBXDxU1uHUipV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
